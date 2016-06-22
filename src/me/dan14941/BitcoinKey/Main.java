@@ -21,15 +21,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class Main extends JavaPlugin implements CommandExecutor
 {
 	public String updatedVerion = null;
+	public Main main = null;
 
 	@Override
 	public void onEnable()
 	{
 		String spigotVersion = null;
+		main = this;
 
 		try {
 			Metrics metrics = new Metrics(this);
@@ -38,29 +41,51 @@ public class Main extends JavaPlugin implements CommandExecutor
 			// Failed to submit the stats :-(
 		}
 
+		File dir = new File("plugins/lib");
+		if(dir.exists() == false)
+		{
+			dir.mkdir();
+		}
+		
 		File f = new File("plugins/lib/bitcoinj-core-0.14.3-bundled.jar");
 		if(f.exists() == false && !f.isDirectory())
 		{ 
 			this.getLogger().info("Downloading bitcoinj library!");
-			// do something
-			URL dld;
-			try {
-				dld = new URL("https://search.maven.org/remotecontent?filepath=org/bitcoinj/bitcoinj-core/0.14.3/bitcoinj-core-0.14.3-bundled.jar");
-				ReadableByteChannel rbc = Channels.newChannel(dld.openStream());
-				FileOutputStream fos = new FileOutputStream("plugins/lib/bitcoinj-core-0.14.3-bundled.jar");
-				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-				fos.close();
-			} catch (MalformedURLException e1)
-			{
-				e1.printStackTrace();
-			}
-			catch (IOException e1) {
-				e1.printStackTrace();
-			}
-
-			this.getLogger().info("Finished download!");
-			this.getLogger().warning("Please reload plugins for " + this.getName() + " to work!");
-			this.getPluginLoader().disablePlugin(this);
+			
+			new BukkitRunnable() {
+	            public void run()
+	            {
+	            	URL dld;
+	    			try {
+	    				dld = new URL("https://search.maven.org/remotecontent?filepath=org/bitcoinj/bitcoinj-core/0.14.3/bitcoinj-core-0.14.3-bundled.jar");
+	    				ReadableByteChannel rbc = Channels.newChannel(dld.openStream());
+	    				FileOutputStream fos = new FileOutputStream("plugins/lib/tmp.jar");
+	    				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+	    				fos.close();
+	    				
+	    				File tmpFile = new File("plugins/lib/tmp.jar");
+	    				File newFile = new File("plugins/lib/bitcoinj-core-0.14.3-bundled.jar");
+	    				tmpFile.renameTo(newFile);
+	    			} catch (MalformedURLException e1)
+	    			{
+	    				e1.printStackTrace();
+	    			}
+	    			catch (IOException e1) {
+	    				e1.printStackTrace();
+	    			}
+	    			
+	    			new BukkitRunnable()
+	    			{
+	    				public void run()
+	    				{
+	    					main.getLogger().info("Finished download!");
+	    					main.getLogger().warning("Please reload plugins for " + main.getName() + " to work!");
+	    					main.getPluginLoader().disablePlugin(main);
+	    				}
+	    			}.runTask(main);
+	            }
+	        }.runTaskAsynchronously(this);
+	        
 			return;
 		}
 
@@ -125,6 +150,21 @@ public class Main extends JavaPlugin implements CommandExecutor
 		str = str.trim();
 		 */
 
+		File depend = new File("plugins/lib/bitcoinj-core-0.14.3-bundled.jar");
+		if(depend.exists() == false && !depend.isDirectory())
+		{ 
+			if(sender instanceof Player)
+			{
+				sender.sendMessage(ChatColor.RED + "Something went wrong! Please ask a staff member to check the console logs!");
+				return true;
+			}
+			else
+			{
+				sender.sendMessage(ChatColor.DARK_RED + "[" + this.getName() + "] Please ensure there is a 'lib/bitcoinJ...' file inside the plugin folder then do /reload.");
+				return true;
+			}
+		}
+		
 		final NetworkParameters netParams;
 		netParams = NetworkParameters.fromID(NetworkParameters.ID_MAINNET);
 
