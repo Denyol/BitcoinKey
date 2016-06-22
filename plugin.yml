@@ -1,0 +1,8 @@
+name: BitcoinKey
+main: me.dan14941.BitcoinKey.Main
+version: 1..1
+
+commands:
+  BitcoinKey:
+    description: Generates a Bitcoin address.
+    #usage: Use /devtools help for commands!
