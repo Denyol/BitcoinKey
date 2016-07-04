@@ -139,17 +139,6 @@ public class Main extends JavaPlugin implements CommandExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
 	{
-		/*
-		String str = "";
-
-		for (int i = 1; i <= 32; i++)
-		{
-			// needs to be 64 digits
-			str = str + String.format("%02d", ((int)(Math.random()*100)));
-		}
-		str = str.trim();
-		 */
-
 		File depend = new File("plugins/lib/bitcoinj-core-0.14.3-bundled.jar");
 		if(depend.exists() == false && !depend.isDirectory())
 		{ 
@@ -168,27 +157,28 @@ public class Main extends JavaPlugin implements CommandExecutor
 		final NetworkParameters netParams;
 		netParams = NetworkParameters.fromID(NetworkParameters.ID_MAINNET);
 
-		//System.out.println(str);
-
 		ECKey key = new ECKey();
 		//key = ECKey.fromPrivate(new BigInteger(str));
 
-		if(sender instanceof Player && sender.hasPermission("BitcoinKey"))
+		if(sender instanceof Player && sender.hasPermission("BitcoinKey.generate"))
 		{
-			String tellrawPub = "tellraw " +sender.getName()+ " [\"\",{\"text\":\"Your Generated Public Key: \",\"color\":\"gold\"},{\"text\":\""+ key.getPublicKeyAsHex() +"\",\"color\":\"light_purple\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + key.getPublicKeyAsHex() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to Copy!\",\"color\":\"red\"}]}}}]";
-			String tellrawPriv = "tellraw " +sender.getName()+ " [\"\",{\"text\":\"Your Generated Private Key: \",\"color\":\"gold\"},{\"text\":\""+ key.getPrivateKeyAsHex() +"\",\"color\":\"light_purple\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + key.getPrivateKeyAsHex() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to Copy!\",\"color\":\"red\"}]}}}]";
-			String tellrawAdd = "tellraw " +sender.getName()+ " [\"\",{\"text\":\"Your Generated Address: \",\"color\":\"gold\"},{\"text\":\""+ key.toAddress(netParams).toString() +"\",\"color\":\"light_purple\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + key.toAddress(netParams).toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to Copy!\",\"color\":\"red\"}]}}}]";
-
+			String commandStart = "tellraw " + sender.getName();
+			String tellrawPub = commandStart+ " [\"\",{\"text\":\"Your Generated Public Key: \",\"color\":\"gold\"},{\"text\":\""+ key.getPublicKeyAsHex() +"\",\"color\":\"light_purple\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + key.getPublicKeyAsHex() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to Copy!\",\"color\":\"red\"}]}}}]";
+			String tellrawPriv = commandStart+ " [\"\",{\"text\":\"Your Generated Private Key: \",\"color\":\"gold\"},{\"text\":\""+ key.getPrivateKeyAsHex() +"\",\"color\":\"light_purple\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + key.getPrivateKeyAsHex() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to Copy!\",\"color\":\"red\"}]}}}]";
+			String tellrawAdd = commandStart+ " [\"\",{\"text\":\"Your Generated Address: \",\"color\":\"gold\"},{\"text\":\""+ key.toAddress(netParams).toString() +"\",\"color\":\"light_purple\",\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + key.toAddress(netParams).toString() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"\",\"extra\":[{\"text\":\"Click to Copy!\",\"color\":\"red\"}]}}}]";
+			String tellrawBlockchainLink = commandStart+ " [\"\",{\"text\":\"Blockchain Address Link: \",\"color\":\"gold\"},{\"text\":\"https://blockchain.info/address/"+key.toAddress(netParams).toString()+"\",\"color\":\"light_purple\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://blockchain.info/address/" + key.toAddress(netParams).toString() +"\"}}]";
 
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), tellrawPub);
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), tellrawPriv);
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), tellrawAdd);
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), tellrawBlockchainLink);
 		}
 		else if(sender instanceof ConsoleCommandSender)
 		{
 			sender.sendMessage(ChatColor.GOLD + "Your Generated Public Key: " + key.getPublicKeyAsHex());
 			sender.sendMessage(ChatColor.GOLD + "Your Generated Private Key: " + key.getPrivateKeyAsHex());
 			sender.sendMessage(ChatColor.GOLD + "Your Generated Address: " + key.toAddress(netParams).toString());
+			sender.sendMessage(ChatColor.GOLD + "Blockchain Address Link: https://blockchain.info/address/" + key.toAddress(netParams).toString());
 		}
 
 		if(sender.hasPermission("BitcoinKey") == false)
